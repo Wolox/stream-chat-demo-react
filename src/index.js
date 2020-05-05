@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import App from './App';
+import WidgetChat from './WidgetChat';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <WidgetChat />
   </React.StrictMode>,
   document.getElementById('root')
 );
