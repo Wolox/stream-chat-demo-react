@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback, useRef } from 'react';
-import { Widget } from 'react-chat-widget';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
+import { Widget, addUserMessage } from 'react-chat-widget';
 import { StreamChat } from 'stream-chat';
 
 // Import default styles for the react-chat-widget
@@ -11,12 +11,13 @@ import { DEFAULT_USER } from './constants';
 const STREAM_API = process.env.REACT_APP_STREAM_API_SECRET;
 
 function WidgetChat({ user }) {  
+  const [messages, setMessages] = useState(null);
+
   // Create client variable from StreamChat using the api
   const client = new StreamChat(STREAM_API);
   const { id, name } = user;
 
   const channel = useRef(null);
-  const state = useRef(null);
 
   // Method - Set the user with the strean chat client variable 
   const setUser = useCallback(async () => {
@@ -24,7 +25,8 @@ function WidgetChat({ user }) {
       { id, name },
       client.devToken(id)
     );
-  }, [client, id, name]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, name]);
 
   // Method - Set the channel, in this case we are setting a messaging
   // default chat provided by StreamChat
@@ -33,8 +35,14 @@ function WidgetChat({ user }) {
       name: 'Wolox customer support',
     });
 
-    state.current = await channel.current.watch();
-  }, [client]);
+    const channelWatch = await channel.current.watch();
+    setMessages(channelWatch.messages);
+
+    return async () => {
+      await channelWatch.stopWatching();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Method - We make use of chat-widget "handleNewUserMessage" prop to update 
   // the chat and send the message to the channel
@@ -48,6 +56,16 @@ function WidgetChat({ user }) {
     setUser();
     setChannel();
   }, [setUser, setChannel]);
+
+  useEffect(
+    () => {
+      console.log('messages', messages);
+      messages && messages.map(
+        message => addUserMessage(message.text)
+      );
+    }, 
+    [messages]
+  );
 
   return (
     <div className="App">
