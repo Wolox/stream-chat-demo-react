@@ -57,13 +57,9 @@ function WidgetChat({ user }) {
     setChannel();
   }, [setUser, setChannel]);
 
+  // Effect - Map through the messages and add them to the widget using 'addUserMessage'
   useEffect(
-    () => {
-      console.log('messages', messages);
-      messages && messages.map(
-        message => addUserMessage(message.text)
-      );
-    }, 
+    () => messages?.map(message => addUserMessage(message.text)), 
     [messages]
   );
 
